@@ -38,7 +38,7 @@ export function exportToExcel(records: InvoiceRecord[]) {
     IGST: sum("igst") as any,
     "Total Amount": sum("total_amount") as any,
     Currency: "",
-    Status: "",
+    Status: "" as any,
   });
 
   const ws = XLSX.utils.json_to_sheet(rows);
