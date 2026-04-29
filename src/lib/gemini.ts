@@ -1,3 +1,5 @@
+import { getAuthToken } from "@/lib/authStorage";
+
 export interface InvoiceData {
   invoice_number: string | null;
   invoice_date: string | null;
@@ -13,7 +15,32 @@ export interface InvoiceData {
   currency: string | null;
 }
 
-const PROMPT = `You are a GST invoice data extractor. Extract the following fields from this invoice and return ONLY a valid JSON object with no extra text: invoice_number, invoice_date, seller_name, seller_gstin, buyer_name, buyer_gstin, taxable_amount, cgst, sgst, igst, total_amount, currency. If a field is not found, return null for that field.`;
+export interface ApiLog {
+  id: string;
+  timestamp: string;
+  level: "info" | "error";
+  message: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface BackendHealth {
+  ok: boolean;
+  hasServerApiKey: boolean;
+}
+
+export interface LogQuery {
+  limit?: number;
+  offset?: number;
+  level?: "info" | "error" | "all";
+  from?: string;
+  to?: string;
+}
+
+export interface LogsResponse {
+  logs: ApiLog[];
+  total: number;
+  hasMore: boolean;
+}
 
 export const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -26,54 +53,93 @@ export const fileToBase64 = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
+async function apiFetch(input: string, init: RequestInit = {}) {
+  const token = getAuthToken();
+  const headers = new Headers(init.headers || {});
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  return fetch(input, { ...init, headers });
+}
+
 export async function extractInvoice(file: File, apiKey: string): Promise<InvoiceData> {
   const base64 = await fileToBase64(file);
   const mimeType = file.type || (file.name.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-  const body = {
-    contents: [
-      {
-        parts: [
-          { text: PROMPT },
-          { inline_data: { mime_type: mimeType, data: base64 } },
-        ],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.1,
-      responseMimeType: "application/json",
-    },
-  };
-
-  const res = await fetch(url, {
+  const res = await apiFetch("/api/extract", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      fileName: file.name,
+      mimeType,
+      base64,
+      apiKey: apiKey.trim() || undefined,
+    }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Gemini API error: ${res.status} ${err}`);
+    throw new Error(`Extraction API error: ${res.status} ${err}`);
   }
 
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Empty response from Gemini");
-
-  // Strip markdown fences if present
-  const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();
-  return JSON.parse(cleaned) as InvoiceData;
+  return (await res.json()) as InvoiceData;
 }
 
 export async function validateApiKey(apiKey: string): Promise<boolean> {
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-    );
-    return res.ok;
+    const res = await apiFetch("/api/validate-key", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiKey }),
+    });
+    const body = (await res.json()) as { ok?: boolean };
+    return Boolean(body.ok);
   } catch {
     return false;
   }
+}
+
+export async function getBackendHealth(): Promise<BackendHealth> {
+  const res = await apiFetch("/api/health");
+  if (!res.ok) throw new Error(`Backend unavailable (${res.status})`);
+  return (await res.json()) as BackendHealth;
+}
+
+export async function getLogs(query: LogQuery = {}): Promise<LogsResponse> {
+  const params = new URLSearchParams();
+  params.set("limit", String(query.limit ?? 80));
+  params.set("offset", String(query.offset ?? 0));
+  if (query.level && query.level !== "all") params.set("level", query.level);
+  if (query.from) params.set("from", query.from);
+  if (query.to) params.set("to", query.to);
+
+  const res = await apiFetch(`/api/logs?${params.toString()}`);
+  if (!res.ok) throw new Error(`Unable to load logs (${res.status})`);
+  const body = (await res.json()) as Partial<LogsResponse>;
+  return {
+    logs: body.logs ?? [],
+    total: body.total ?? 0,
+    hasMore: Boolean(body.hasMore),
+  };
+}
+
+export async function clearLogs(): Promise<void> {
+  const res = await apiFetch("/api/logs", { method: "DELETE" });
+  if (!res.ok) throw new Error(`Unable to clear logs (${res.status})`);
+}
+
+export function getLogsCsvUrl(query: LogQuery = {}): string {
+  const params = new URLSearchParams();
+  params.set("limit", String(query.limit ?? 300));
+  if (query.level && query.level !== "all") params.set("level", query.level);
+  if (query.from) params.set("from", query.from);
+  if (query.to) params.set("to", query.to);
+  return `/api/logs/export.csv?${params.toString()}`;
+}
+
+export async function getLogDates(level?: "all" | "info" | "error"): Promise<string[]> {
+  const params = new URLSearchParams();
+  if (level && level !== "all") params.set("level", level);
+  const query = params.toString();
+  const res = await apiFetch(`/api/log-dates${query ? `?${query}` : ""}`);
+  if (!res.ok) throw new Error(`Unable to load log dates (${res.status})`);
+  const body = (await res.json()) as { dates?: string[] };
+  return body.dates ?? [];
 }

@@ -33,20 +33,20 @@ export const UploadZone = ({ files, onAdd, onRemove, onExtract, processing, hasA
       <div
         {...getRootProps()}
         className={cn(
-          "relative rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-smooth",
-          "bg-gradient-to-b from-accent/30 to-transparent",
+          "relative rounded-xl border border-dashed p-6 sm:p-10 text-center cursor-pointer transition-smooth",
+          "bg-white",
           isDragActive
-            ? "border-primary bg-accent/60 scale-[1.01]"
-            : "border-border hover:border-primary/50 hover:bg-accent/20"
+            ? "border-blue-500 bg-blue-50/60 scale-[1.01]"
+            : "border-[#bed0e5] hover:border-blue-400 hover:bg-blue-50/40"
         )}
       >
         <input {...getInputProps()} />
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-14 w-14 rounded-full gradient-primary flex items-center justify-center shadow-elegant">
-            <Upload className="h-7 w-7 text-primary-foreground" />
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center">
+            <Upload className="h-7 w-7 text-blue-600" />
           </div>
           <div>
-            <p className="text-lg font-semibold">
+            <p className="text-base sm:text-lg font-semibold">
               {isDragActive ? "Drop invoices here" : "Drag & drop invoices here"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
@@ -57,15 +57,15 @@ export const UploadZone = ({ files, onAdd, onRemove, onExtract, processing, hasA
       </div>
 
       {files.length > 0 && (
-        <div className="rounded-xl border bg-card p-4 shadow-card">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-xl border border-[#c8d6e8] bg-white p-4 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <p className="text-sm font-medium">
               {files.length} file{files.length > 1 ? "s" : ""} ready
             </p>
             <Button
               onClick={onExtract}
               disabled={processing || !hasApiKey}
-              className="gradient-primary text-primary-foreground hover:opacity-90"
+              className="bg-[#2f88db] text-white hover:bg-[#2678c3]"
             >
               {processing ? "Extracting..." : "Extract All"}
             </Button>
