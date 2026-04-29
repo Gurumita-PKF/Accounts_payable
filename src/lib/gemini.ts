@@ -1,7 +1,7 @@
 import { getAuthToken } from "@/lib/authStorage";
 
 // API Base URL - uses environment variable or defaults to localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 export interface InvoiceData {
   invoice_number: string | null;
