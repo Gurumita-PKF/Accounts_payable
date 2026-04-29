@@ -4,15 +4,14 @@ import express from "express";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
+import Database from "better-sqlite3";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT || 3001);
+const PORT = Number(process.env.PORT || 5000);
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const JWT_SECRET = process.env.JWT_SECRET || "";
@@ -34,12 +33,10 @@ const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 
+// Initialize database synchronously
 await fs.mkdir(DB_DIR, { recursive: true });
-const db = await open({
-  filename: DB_PATH,
-  driver: sqlite3.Database,
-});
-await db.exec(`
+const db = new Database(DB_PATH);
+db.exec(`
   CREATE TABLE IF NOT EXISTS logs (
     id TEXT PRIMARY KEY,
     timestamp TEXT NOT NULL,
@@ -52,17 +49,16 @@ await db.exec(`
 async function addLog(level, message, meta = undefined) {
   const id = crypto.randomUUID();
   const timestamp = new Date().toISOString();
-  await db.run(
-    "INSERT INTO logs (id, timestamp, level, message, meta) VALUES (?, ?, ?, ?, ?)",
-    [id, timestamp, level, message, meta ? JSON.stringify(meta) : null]
-  );
-  await db.run(
+  db.prepare(
+    "INSERT INTO logs (id, timestamp, level, message, meta) VALUES (?, ?, ?, ?, ?)"
+  ).run(id, timestamp, level, message, meta ? JSON.stringify(meta) : null);
+  
+  db.prepare(
     `DELETE FROM logs
      WHERE id NOT IN (
        SELECT id FROM logs ORDER BY timestamp DESC LIMIT ?
-     )`,
-    [MAX_LOGS]
-  );
+     )`
+  ).run(MAX_LOGS);
 
   if (level === "error") console.error("[api]", message, meta || "");
   else console.log("[api]", message);
@@ -217,10 +213,10 @@ app.post("/api/auth/google", async (req, res) => {
       picture: payload.picture || undefined,
     };
     const token = jwt.sign(user, JWT_SECRET, { expiresIn: "12h" });
-    await addLog("info", "SSO login successful", { email: user.email });
+    addLog("info", "SSO login successful", { email: user.email });
     return res.json({ token, user });
   } catch (error) {
-    await addLog("error", "SSO login failed", { error: String(error) });
+    addLog("error", "SSO login failed", { error: String(error) });
     return res.status(401).json({ message: "Invalid Google credential" });
   }
 });
@@ -239,18 +235,16 @@ app.get("/api/logs", requireAuth, async (req, res) => {
   const to = typeof req.query.to === "string" ? req.query.to : undefined;
   const { where, params } = buildLogWhereClause({ level, from, to });
 
-  const countRow = await db.get(
-    `SELECT COUNT(*) AS total FROM logs ${where}`,
-    params
-  );
+  const countRow = db.prepare(
+    `SELECT COUNT(*) AS total FROM logs ${where}`
+  ).get(...params);
   const total = Number(countRow?.total || 0);
-  const rows = await db.all(
+  const rows = db.prepare(
     `SELECT id, timestamp, level, message, meta
      FROM logs ${where}
      ORDER BY timestamp DESC
-     LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
-  );
+     LIMIT ? OFFSET ?`
+  ).all(...params, limit, offset);
   res.json({
     logs: rows.map(parseLogRow),
     total,
@@ -267,19 +261,18 @@ app.get("/api/log-dates", requireAuth, async (req, res) => {
     params.push(level);
   }
 
-  const rows = await db.all(
+  const rows = db.prepare(
     `SELECT DISTINCT date(timestamp, 'localtime') AS d
      FROM logs
      ${where}
-     ORDER BY d DESC`,
-    params
-  );
+     ORDER BY d DESC`
+  ).all(...params);
 
   res.json({ dates: rows.map((r) => r.d).filter(Boolean) });
 });
 
 app.delete("/api/logs", requireAuth, async (_req, res) => {
-  await db.run("DELETE FROM logs");
+  db.prepare("DELETE FROM logs").run();
   res.json({ ok: true });
 });
 
@@ -290,13 +283,12 @@ app.get("/api/logs/export.csv", requireAuth, async (req, res) => {
   const from = typeof req.query.from === "string" ? req.query.from : undefined;
   const to = typeof req.query.to === "string" ? req.query.to : undefined;
   const { where, params } = buildLogWhereClause({ level, from, to });
-  const rows = await db.all(
+  const rows = db.prepare(
     `SELECT id, timestamp, level, message, meta
      FROM logs ${where}
      ORDER BY timestamp DESC
-     LIMIT ?`,
-    [...params, limit]
-  );
+     LIMIT ?`
+  ).all(...params, limit);
   const header = ["id", "timestamp", "level", "message", "meta"].join(",");
   const lines = rows.map((row) =>
     [
@@ -325,10 +317,10 @@ app.post("/api/validate-key", requireAuth, async (req, res) => {
     const validateRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
     );
-    await addLog("info", "API key validation attempted", { ok: validateRes.ok });
+    addLog("info", "API key validation attempted", { ok: validateRes.ok });
     return res.json({ ok: validateRes.ok });
   } catch (error) {
-    await addLog("error", "API key validation failed", { error: String(error) });
+    addLog("error", "API key validation failed", { error: String(error) });
     return res.status(500).json({ ok: false });
   }
 });
@@ -346,7 +338,7 @@ app.post("/api/extract", requireAuth, async (req, res) => {
     return res.status(400).json({ message: "Missing invoice payload." });
   }
 
-  await addLog("info", "Extraction started", {
+  addLog("info", "Extraction started", {
     fileName: String(fileName || "unknown"),
     mimeType: String(mimeType || "application/octet-stream"),
   });
@@ -357,14 +349,14 @@ app.post("/api/extract", requireAuth, async (req, res) => {
       mimeType: String(mimeType || "application/pdf"),
       apiKey,
     });
-    await addLog("info", "Extraction completed", {
+    addLog("info", "Extraction completed", {
       fileName: String(fileName || "unknown"),
       invoiceNumber: data?.invoice_number || null,
     });
     return res.json(data);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown extraction error";
-    await addLog("error", "Extraction failed", {
+    addLog("error", "Extraction failed", {
       fileName: String(fileName || "unknown"),
       error: message,
     });
@@ -372,6 +364,7 @@ app.post("/api/extract", requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, async () => {
-  await addLog("info", `Backend listening on port ${PORT}`);
+app.listen(PORT, () => {
+  addLog("info", `Backend listening on port ${PORT}`);
+  console.log(`✓ Server is running on http://localhost:${PORT}`);
 });
