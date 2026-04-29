@@ -33,18 +33,46 @@ const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 app.use(cors());
 app.use(express.json({ limit: "25mb" }));
 
-// Initialize database synchronously
-await fs.mkdir(DB_DIR, { recursive: true });
-const db = new Database(DB_PATH);
-db.exec(`
-  CREATE TABLE IF NOT EXISTS logs (
-    id TEXT PRIMARY KEY,
-    timestamp TEXT NOT NULL,
-    level TEXT NOT NULL,
-    message TEXT NOT NULL,
-    meta TEXT
-  );
-`);
+// Database will be initialized in startServer()
+let db;
+
+async function startServer() {
+  try {
+    // Initialize database
+    console.log("🔧 Initializing database...");
+    await fs.mkdir(DB_DIR, { recursive: true });
+    db = new Database(DB_PATH);
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS logs (
+        id TEXT PRIMARY KEY,
+        timestamp TEXT NOT NULL,
+        level TEXT NOT NULL,
+        message TEXT NOT NULL,
+        meta TEXT
+      );
+    `);
+    console.log("✅ Database initialized successfully");
+
+    // Start server
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ Server is running on port ${PORT}`);
+      console.log(`🌐 Listening on 0.0.0.0:${PORT}`);
+    });
+
+    // Graceful shutdown
+    process.on("SIGTERM", () => {
+      console.log("⚠️  SIGTERM received, shutting down gracefully...");
+      server.close(() => {
+        console.log("✅ Server closed");
+        process.exit(0);
+      });
+    });
+
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+}
 
 async function addLog(level, message, meta = undefined) {
   const id = crypto.randomUUID();
@@ -364,7 +392,5 @@ app.post("/api/extract", requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  addLog("info", `Backend listening on port ${PORT}`);
-  console.log(`✓ Server is running on http://localhost:${PORT}`);
-});
+// Start the server
+startServer();
