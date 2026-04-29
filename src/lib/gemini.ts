@@ -1,5 +1,8 @@
 import { getAuthToken } from "@/lib/authStorage";
 
+// API Base URL - uses environment variable or defaults to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export interface InvoiceData {
   invoice_number: string | null;
   invoice_date: string | null;
@@ -57,7 +60,10 @@ async function apiFetch(input: string, init: RequestInit = {}) {
   const token = getAuthToken();
   const headers = new Headers(init.headers || {});
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  return fetch(input, { ...init, headers });
+  
+  // Prepend base URL for relative paths
+  const url = input.startsWith("/") ? `${API_BASE_URL}${input}` : input;
+  return fetch(url, { ...init, headers });
 }
 
 export async function extractInvoice(file: File, apiKey: string): Promise<InvoiceData> {
