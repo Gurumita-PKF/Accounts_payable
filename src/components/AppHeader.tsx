@@ -40,8 +40,8 @@ export const AppHeader = ({ title, subtitle, actions }: Props) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 lg:gap-3">
-            <div className="flex gap-2 overflow-x-auto scrollbar-thin">
+          <div className="flex w-full lg:w-auto items-center justify-between gap-2 lg:gap-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-thin min-w-0">
               <NavLink
                 to="/"
                 className={({ isActive }: { isActive: boolean }) =>

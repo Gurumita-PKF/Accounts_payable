@@ -276,7 +276,7 @@ const Index = () => {
         subtitle="Structured workspace for extraction and review"
       />
 
-      <main className="relative z-10 container max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 space-y-6 flex-1">
+      <main className="relative z-10 container max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 space-y-6 flex-1 px-3 sm:px-4 md:px-6">
         <section className="grid gap-6 xl:grid-cols-12 items-start">
           <div className="xl:col-span-7">
             <section className="rounded-xl border border-[#c8d6e8] bg-[#f7fbff] p-4 sm:p-5 shadow-sm space-y-4">
@@ -332,7 +332,7 @@ const Index = () => {
                   Compact table with quick filters. Click row for full details.
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex w-full sm:w-auto flex-col sm:flex-row gap-2">
                 <Button variant="outline" size="sm" onClick={handleClearHistory} disabled={records.length === 0}>
                   <Trash className="h-4 w-4 mr-2" />
                   Clear History
@@ -349,8 +349,9 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <div className="inline-flex rounded-md border overflow-hidden">
+            <div className="space-y-2">
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="inline-flex rounded-md border overflow-hidden shrink-0">
                 <Button
                   size="sm"
                   variant={recordsView === "cards" ? "default" : "ghost"}
@@ -367,28 +368,29 @@ const Index = () => {
                 >
                   Table
                 </Button>
+                </div>
+                {(["all", "processing", "extracted", "failed"] as const).map((status) => (
+                  <Button
+                    key={status}
+                    size="sm"
+                    variant={statusFilter === status ? "default" : "outline"}
+                    className={`shrink-0 ${
+                      statusFilter === status
+                        ? status === "processing"
+                          ? "bg-amber-500 hover:bg-amber-600 text-white border-transparent"
+                          : status === "extracted"
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white border-transparent"
+                            : status === "failed"
+                              ? "bg-red-600 hover:bg-red-700 text-white border-transparent"
+                              : "bg-[#2f88db] hover:bg-[#2678c3] text-white border-transparent"
+                        : ""
+                    }`}
+                    onClick={() => setStatusFilter(status)}
+                  >
+                    {status === "all" ? "All" : status[0].toUpperCase() + status.slice(1)}
+                  </Button>
+                ))}
               </div>
-              {(["all", "processing", "extracted", "failed"] as const).map((status) => (
-                <Button
-                  key={status}
-                  size="sm"
-                  variant={statusFilter === status ? "default" : "outline"}
-                  className={
-                    statusFilter === status
-                      ? status === "processing"
-                        ? "bg-amber-500 hover:bg-amber-600 text-white border-transparent"
-                        : status === "extracted"
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white border-transparent"
-                          : status === "failed"
-                            ? "bg-red-600 hover:bg-red-700 text-white border-transparent"
-                            : "bg-[#2f88db] hover:bg-[#2678c3] text-white border-transparent"
-                      : ""
-                  }
-                  onClick={() => setStatusFilter(status)}
-                >
-                  {status === "all" ? "All" : status[0].toUpperCase() + status.slice(1)}
-                </Button>
-              ))}
               <div className="relative w-full sm:min-w-[240px] sm:flex-1 sm:max-w-md">
                 <Search className="h-4 w-4 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input

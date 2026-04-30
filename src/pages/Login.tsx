@@ -129,13 +129,13 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="rounded-[18px] border border-slate-200 bg-[#f8fafc] p-5 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.10)] space-y-5 self-stretch text-slate-800">
+          <div className="rounded-[18px] border border-slate-200 bg-[#f8fafc] p-4 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.10)] space-y-5 self-stretch text-slate-800">
             <div className="flex items-center gap-3">
               <div className="h-14 w-14 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center shadow-[0_8px_18px_rgba(79,70,229,0.28)]">
                 <ShieldCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-semibold leading-tight">Secure Sign-in</h2>
+                <h2 className="text-2xl sm:text-3xl font-semibold leading-tight">Secure Sign-in</h2>
                 <p className="text-sm text-slate-600">Access Accounts Payable with Microsoft SSO</p>
               </div>
             </div>
@@ -172,13 +172,13 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-2.5 pr-24 flex items-start gap-2">
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white px-3 py-2.5 flex flex-col sm:flex-row items-start gap-2">
               <Info className="h-4.5 w-4.5 mt-0.5 shrink-0 text-slate-500" />
               <div className="text-[13px] leading-5 text-slate-700">
                 <p>Use your Microsoft work/school account.</p>
                 <p>If access is denied, contact your admin.</p>
               </div>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 h-14 w-14 rounded-xl bg-gradient-to-br from-[#dbeafe] via-[#c7d2fe] to-[#e0e7ff] border border-blue-200/80 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]">
+              <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-gradient-to-br from-[#dbeafe] via-[#c7d2fe] to-[#e0e7ff] border border-blue-200/80 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] self-end sm:absolute sm:right-2 sm:top-1/2 sm:-translate-y-1/2">
                 <div className="h-8 w-8 rounded-lg bg-white/60 flex items-center justify-center border border-white/70">
                   <LockKeyhole className="h-4 w-4 text-blue-600" />
                 </div>
@@ -234,7 +234,7 @@ const Login = () => {
                     </>
                   )}
                 </Button>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div className="h-10 rounded-xl border border-slate-300 bg-white flex items-center justify-center gap-2 text-slate-700 text-sm font-medium">
                     <Shield className="h-4 w-4 text-blue-500" />
                     SSO
@@ -251,7 +251,7 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-[#f6f8fc] p-3">
-                  <div className="flex items-center justify-between gap-3 text-[13px] text-slate-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[13px] text-slate-600">
                     <span>{signingIn ? "Signing in..." : "Need access? Contact admin."}</span>
                     <Button
                       variant="ghost"

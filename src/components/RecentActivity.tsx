@@ -25,7 +25,7 @@ export const RecentActivity = ({ records, loading }: Props) => {
         <div className="space-y-2">
           {records.slice(0, 6).map((r) => (
             <div key={r.id} className="rounded-md border p-2 text-sm">
-              <p className="font-medium truncate">{r.fileName}</p>
+              <p className="font-medium truncate" title={r.fileName}>{r.fileName}</p>
               <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                 {r.status === "processing" && (
                   <>

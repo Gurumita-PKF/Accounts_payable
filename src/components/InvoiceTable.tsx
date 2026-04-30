@@ -94,7 +94,7 @@ export const InvoiceTable = ({
   return (
     <div className="rounded-2xl border border-[#c8d6e8] bg-white shadow-[0_14px_32px_rgba(15,42,85,0.12)] scale-[1.005] overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm table-fixed">
+        <table className="w-full min-w-[920px] text-sm table-fixed">
           <thead className="bg-[#f3f8ff] border-b border-[#d6e2f0]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-bold tracking-wide text-slate-600 uppercase w-12">#</th>
@@ -150,7 +150,10 @@ export const InvoiceTable = ({
                 </td>
                 {COLUMNS.map((col) => (
                   <td key={col.key} className={cn("align-middle", compact ? "px-3 py-2" : "px-4 py-2.5")}>
-                    <div className={cn("truncate", col.numeric ? "text-right tabular-nums" : "text-left")}>
+                    <div
+                      className={cn("truncate", col.numeric ? "text-right tabular-nums" : "text-left")}
+                      title={String(rec[col.key] ?? "-")}
+                    >
                       {col.numeric ? formatNumeric(rec[col.key]) : String(rec[col.key] ?? "-")}
                     </div>
                   </td>
@@ -238,16 +241,17 @@ export const InvoiceTable = ({
           </tbody>
         </table>
       </div>
-      <div className="border-t border-[#d6e2f0] px-3 py-2 flex items-center justify-between text-xs text-muted-foreground bg-[#f9fbff]">
+      <div className="border-t border-[#d6e2f0] px-3 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground bg-[#f9fbff]">
         <span>
           Page {page} / {totalPages} · {sorted.length} record(s)
         </span>
-        <div className="flex gap-2">
+        <div className="flex w-full sm:w-auto gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
+            className="flex-1 sm:flex-none"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Prev
@@ -257,6 +261,7 @@ export const InvoiceTable = ({
             size="sm"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
+            className="flex-1 sm:flex-none"
           >
             Next
             <ChevronRight className="h-4 w-4 ml-1" />

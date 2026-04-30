@@ -86,7 +86,7 @@ export const UploadZone = ({ files, onAdd, onRemove, onExtract, processing, hasA
                 </span>
                 <button
                   onClick={() => onRemove(f.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   aria-label="Remove file"
                 >
                   <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />

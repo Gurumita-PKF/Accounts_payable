@@ -14,7 +14,7 @@ export const BottomFooterBar = ({ variant = "internal" }: BottomFooterBarProps) 
     <div className={wrapperClass}>
       <div className="container max-w-7xl mx-auto py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-slate-300">
         <p>© 2026 Accounts Payable Application. All rights reserved.</p>
-        <div className="flex items-center gap-5 sm:gap-6">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <Link to="/about" className="hover:text-white transition-colors">
             Terms
           </Link>

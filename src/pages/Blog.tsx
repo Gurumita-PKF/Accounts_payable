@@ -30,7 +30,7 @@ const Blog = () => {
   return (
     <PublicSiteLayout>
       <section className="container max-w-7xl mx-auto py-10 md:py-14 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex items-center gap-2">
             <div className="h-9 w-9 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
               <Building2 className="h-4 w-4 text-white" />

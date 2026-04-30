@@ -144,13 +144,14 @@ export const InvoiceDetailsDialog = ({
             )}
           </ScrollArea>
         </div>
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
           <Button
             variant="outline"
             onClick={() => {
               setDraft(record);
               onOpenChange(false);
             }}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
@@ -160,6 +161,7 @@ export const InvoiceDetailsDialog = ({
               onOpenChange(false);
             }}
             disabled={!isDirty}
+            className="w-full sm:w-auto"
           >
             Save Changes
           </Button>

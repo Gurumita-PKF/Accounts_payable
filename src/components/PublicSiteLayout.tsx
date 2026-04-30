@@ -45,7 +45,7 @@ export const PublicSiteLayout = ({ children, backgroundVariant = "dots" }: Publi
         </div>
       ) : null}
       <header className="relative z-20 border-b border-white/15 bg-slate-900/60 backdrop-blur-lg">
-        <div className="container max-w-7xl mx-auto min-h-20 py-2.5 flex items-center justify-between gap-4">
+        <div className="container max-w-7xl mx-auto min-h-20 py-2.5 flex flex-wrap items-center justify-between gap-3">
           <BrandLogo size="lg" className="shrink-0" />
           <nav className="hidden md:flex items-center gap-3">
             {links.map((link) => (
@@ -66,7 +66,7 @@ export const PublicSiteLayout = ({ children, backgroundVariant = "dots" }: Publi
           <Button
             asChild
             size="default"
-            className="h-10 px-5 text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+            className="h-10 px-4 sm:px-5 text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white ml-auto md:ml-0"
           >
             <NavLink to="/login">Get Started</NavLink>
           </Button>

@@ -7,9 +7,9 @@ interface BrandLogoProps {
 }
 
 const sizeMap = {
-  sm: { img: "h-12 w-48", text: "text-xs" },
-  md: { img: "h-14 w-64", text: "text-sm" },
-  lg: { img: "h-16 w-72 md:h-[72px] md:w-80", text: "text-base" },
+  sm: { img: "h-10 w-36 sm:h-12 sm:w-48", text: "text-xs" },
+  md: { img: "h-11 w-44 sm:h-14 sm:w-64", text: "text-sm" },
+  lg: { img: "h-12 w-52 sm:h-16 sm:w-72 md:h-[72px] md:w-80", text: "text-base" },
 };
 
 export const BrandLogo = ({ showText = false, size = "md", className }: BrandLogoProps) => {

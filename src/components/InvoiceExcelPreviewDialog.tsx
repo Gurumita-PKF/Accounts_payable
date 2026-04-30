@@ -108,8 +108,8 @@ export const InvoiceExcelPreviewDialog = ({ open, record, onOpenChange, onDownlo
           </table>
         </div>
 
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
             Cancel
           </Button>
           <Button
@@ -125,6 +125,7 @@ export const InvoiceExcelPreviewDialog = ({ open, record, onOpenChange, onDownlo
               }
               onOpenChange(false);
             }}
+            className="w-full sm:w-auto"
           >
             {downloading ? "Downloading..." : "Download Excel"}
           </Button>

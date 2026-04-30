@@ -118,7 +118,7 @@ const Logs = () => {
         }
       />
 
-      <main className="relative z-10 container max-w-7xl mx-auto py-8 space-y-8 flex-1">
+      <main className="relative z-10 container max-w-7xl mx-auto py-6 sm:py-8 space-y-6 sm:space-y-8 flex-1 px-3 sm:px-4 md:px-6">
         <LogsPanel
           logs={logs}
           loading={logsLoading}

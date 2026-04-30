@@ -61,7 +61,7 @@ export const InvoiceCards = ({
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="font-medium truncate">{rec.fileName}</p>
+              <p className="font-medium break-all line-clamp-2" title={rec.fileName}>{rec.fileName}</p>
               <p className="text-xs text-muted-foreground truncate">
                 Invoice: {rec.invoice_number || "-"}
               </p>

@@ -70,7 +70,7 @@ const Settings = () => {
         subtitle="Manage API key, backend status, and app preferences"
       />
 
-      <main className="relative z-10 container max-w-4xl mx-auto py-8 space-y-6 flex-1">
+      <main className="relative z-10 container max-w-4xl mx-auto py-6 sm:py-8 space-y-6 flex-1 px-3 sm:px-4 md:px-6">
         <section className="rounded-xl border bg-card p-5 shadow-card space-y-4">
           <div>
             <h2 className="text-lg font-semibold">API Configuration</h2>
@@ -88,7 +88,7 @@ const Settings = () => {
               onChange={(e) => setApiKey(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button onClick={handleSaveApiKey} disabled={validating}>
               {validating ? "Validating..." : "Save API Key"}
             </Button>
@@ -104,7 +104,7 @@ const Settings = () => {
               Backend is required for extraction and logs.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Badge variant={backendOnline ? "default" : "destructive"}>
               {backendOnline ? "Online" : "Offline"}
             </Badge>
@@ -125,20 +125,20 @@ const Settings = () => {
             </p>
           </div>
 
-          <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex items-center justify-between gap-3 rounded-md border p-3">
             <div>
               <p className="font-medium text-sm">Auto refresh logs</p>
               <p className="text-xs text-muted-foreground">Refresh logs page every 5 seconds.</p>
             </div>
-            <Switch checked={autoRefreshLogs} onCheckedChange={setAutoRefreshLogs} />
+            <Switch checked={autoRefreshLogs} onCheckedChange={setAutoRefreshLogs} className="shrink-0" />
           </div>
 
-          <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex items-center justify-between gap-3 rounded-md border p-3">
             <div>
               <p className="font-medium text-sm">Compact records table</p>
               <p className="text-xs text-muted-foreground">Use denser row spacing in dashboard table.</p>
             </div>
-            <Switch checked={compactTable} onCheckedChange={setCompactTable} />
+            <Switch checked={compactTable} onCheckedChange={setCompactTable} className="shrink-0" />
           </div>
 
           <Button onClick={handleSavePreferences}>Save Preferences</Button>
