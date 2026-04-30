@@ -30,7 +30,19 @@ const DB_DIR = path.join(__dirname, "data");
 const DB_PATH = path.join(DB_DIR, "logs.db");
 const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-app.use(cors());
+// Configure CORS for production
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "https://accounts-payable-five.vercel.app",
+    "https://accounts-payable.onrender.com",
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json({ limit: "25mb" }));
 
 // Database will be initialized in startServer()
